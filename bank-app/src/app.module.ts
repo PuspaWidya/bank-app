@@ -9,6 +9,8 @@ import { AuthModule } from './module/auth/auth.module';
 import { UsersModule } from './module/users/users.module';
 import { JwtModule } from '@nestjs/jwt';
 import Invoice from './entities/logPayment.entity';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './module/auth/jwt-auth.guard';
 
 @Module({
   imports: [
@@ -31,6 +33,12 @@ import Invoice from './entities/logPayment.entity';
     UsersModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
 })
 export class AppModule {}
