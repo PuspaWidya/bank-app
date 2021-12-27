@@ -24,10 +24,10 @@ export class User extends Model {
   @Column({ allowNull: false })
   name: string;
 
-  @Column({ allowNull: false, unique: true })
+  @Column({ allowNull: false })
   username: string;
 
-  @Column({ allowNull: false, validate: { isEmail: true }, unique: true })
+  @Column({ allowNull: false, validate: { isEmail: true } })
   email: string;
 
   @Column({ allowNull: false })
@@ -44,7 +44,7 @@ export class User extends Model {
   role: string;
 
   @HasMany(() => IncomeExpense)
-  incomeId: string;
+  incomeExpenseId: string;
 
   @BeforeCreate
   static generate(user: User) {

@@ -1,8 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
+import sequelize from 'sequelize';
+import { successConstant } from 'src/common/errorCode';
+import { FilterException } from 'src/common/filterException';
 import { User } from 'src/entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { Op } from 'sequelize';
 
 @Injectable()
 export class UsersService {
@@ -18,8 +22,29 @@ export class UsersService {
     });
   }
 
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  async create(createUserDto: CreateUserDto) {
+    try {
+      const checkUser = await this.userRepository.findOne({
+        where: {
+          [Op.or]: [
+            {
+              email: createUserDto.email,
+            },
+            { username: createUserDto.username },
+          ],
+        },
+      });
+
+      if (checkUser) {
+        throw new ForbiddenException({ message: 'user already exist' });
+      }
+
+      await this.userRepository.create(createUserDto);
+
+      return successConstant;
+    } catch (err) {
+      throw new FilterException(err);
+    }
   }
 
   findAll() {
