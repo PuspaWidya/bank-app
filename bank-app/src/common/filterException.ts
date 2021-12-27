@@ -11,6 +11,9 @@ export class FilterException extends HttpException {
   constructor(error: any) {
     const { status, response, message } = error;
     const statusCode = status ?? HttpStatus.INTERNAL_SERVER_ERROR;
-    super({ message, errorCode: null, ...response }, statusCode);
+    super(
+      { message, errorCode: response.status || statusCode, ...response },
+      statusCode,
+    );
   }
 }
