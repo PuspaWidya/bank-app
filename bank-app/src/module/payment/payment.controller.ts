@@ -37,26 +37,28 @@ export class PaymentController {
     return this.paymentService.createPayment(createPaymentDto, req.user);
   }
 
+  // //update income and expense that come ?
+
   //see invoices that are input by admin
-  @Get()
+  @Get('admin')
   findAll(@Request() req) {
     return this.paymentService.findAll(req.user);
   }
 
   //see detail invoice
-  @Get(':id')
-  findOne(@Param('invoice') invoice: string) {
-    return this.paymentService.findOne(invoice);
+  @Get('admin/:id')
+  findOne(@Param('id') id: string) {
+    return this.paymentService.findOne(id);
   }
 
   //delete invoice -> only super admin that can do it
   @Delete(':id')
-  remove(@Body() invoiceNumber: string) {
-    return this.paymentService.remove(invoiceNumber);
+  remove(@Param('id') id: string, @Request() req) {
+    return this.paymentService.remove(id, req.user);
   }
 
   //get all invoice -> just super admin that can see it
-  @Get('superAdmin')
+  @Get('superadmin')
   getAllData(@Request() req) {
     return this.paymentService.getAllData(req.user);
   }

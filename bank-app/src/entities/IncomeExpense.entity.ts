@@ -1,4 +1,3 @@
-import { IsOptional } from 'class-validator';
 import {
   AllowNull,
   BeforeCreate,
@@ -15,6 +14,7 @@ import {
 import { PaymentMethod, TypeFee } from 'src/common/enum';
 
 import { v4 as uuid } from 'uuid';
+import Invoice from './invoice.entity';
 import { User } from './user.entity';
 
 //log
@@ -42,8 +42,8 @@ export class IncomeExpense extends Model {
   @Column({ allowNull: false })
   paymentReceiver: string;
 
-  @Column({ allowNull: false })
-  invoiceNumber: string;
+  // @Column({ allowNull: false })
+  // invoiceNumber: string;
 
   @Column
   userCode: string;
@@ -57,13 +57,19 @@ export class IncomeExpense extends Model {
   @Column
   description: string;
 
-  //siapa yang memasukan data tersebut
   @ForeignKey(() => User)
   @Column
   userId: string;
 
   @BelongsTo(() => User)
   user: User;
+
+  @BelongsTo(() => Invoice, { foreignKey: 'invoiceNumber' })
+  invoice: Invoice;
+
+  @ForeignKey(() => Invoice)
+  @Column
+  invoiceNumber: string;
 
   @BeforeCreate
   static generate(incomeExpense: IncomeExpense) {

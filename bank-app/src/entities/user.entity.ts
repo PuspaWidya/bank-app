@@ -12,6 +12,7 @@ import { RoleType } from 'src/common/enum';
 
 import { v4 as uuid } from 'uuid';
 import { IncomeExpense } from './IncomeExpense.entity';
+import Invoice from './invoice.entity';
 
 const bcrypt = require('bcryptjs');
 
@@ -38,7 +39,10 @@ export class User extends Model {
   role: RoleType;
 
   @HasMany(() => IncomeExpense)
-  incomeExpenseId: string;
+  incomeExpense: string;
+
+  @HasMany(() => Invoice)
+  invoice: string;
 
   @BeforeCreate
   static generate(user: User) {

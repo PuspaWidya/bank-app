@@ -2,13 +2,16 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import sequelize from 'sequelize';
+import { Op, Sequelize } from 'sequelize';
+import { RoleType } from 'src/common/enum';
 import { successConstant } from 'src/common/errorCode';
 import { FilterException } from 'src/common/filterException';
 import { IncomeExpense } from 'src/entities/IncomeExpense.entity';
 import Invoice from 'src/entities/invoice.entity';
+import { User } from 'src/entities/user.entity';
 import { CreateInvoice } from './dto/create-invoice.dto';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { UpdateInvoiceDto } from './dto/update-invoice.dto';
@@ -34,7 +37,6 @@ export class PaymentService {
       throw new FilterException({ message: 'invoice already exist' });
     }
 
-    console.log({ payload });
     await this.invoiceRepository.create({
       userId: payload.userId,
       totalBalance: createInvoiceDto.balance,
@@ -54,8 +56,12 @@ export class PaymentService {
 
   async findOne(invoiceNumber: string) {
     try {
-      const invoice = await this.checkInvoice(invoiceNumber);
-
+      const invoice = await this.invoiceRepository.findOne({
+        where: {
+          invoiceNumber,
+        },
+        include: [{ model: IncomeExpense }],
+      });
       if (!invoice) {
         throw new NotFoundException({ message: 'invoice not found' });
       }
@@ -68,14 +74,14 @@ export class PaymentService {
   async update(updatePaymentDto: UpdateInvoiceDto, payload) {
     try {
       const { invoiceNumber } = updatePaymentDto;
-      if (invoiceNumber) {
+
+      if (!invoiceNumber) {
         throw new FilterException({ message: 'invoice number must be filled' });
       }
 
       const checkInvoice = await this.invoiceRepository.findOne({
         where: {
           invoiceNumber: invoiceNumber,
-          userId: payload.userId,
         },
       });
 
@@ -104,19 +110,10 @@ export class PaymentService {
       }
 
       if (type === 'INCOME') {
-        //update invoice
-        await this.invoiceRepository.update(
-          {
-            totalBalance: sequelize.literal(
-              `totalBalance + createPaymentDto.amount`,
-            ),
-          },
-          {
-            where: {
-              invoiceNumber: createPaymentDto.invoiceNumber,
-            },
-          },
-        );
+        await this.invoiceRepository.increment('totalBalance', {
+          by: amount,
+          where: { invoiceNumber },
+        });
       }
 
       if (type === 'EXPENSE') {
@@ -126,18 +123,10 @@ export class PaymentService {
           });
         }
 
-        await this.invoiceRepository.update(
-          {
-            totalBalance: sequelize.literal(
-              `totalBalance - createPaymentDto.amount`,
-            ),
-          },
-          {
-            where: {
-              invoiceNumber: createPaymentDto.invoiceNumber,
-            },
-          },
-        );
+        await this.invoiceRepository.increment('totalBalance', {
+          by: -amount,
+          where: { invoiceNumber },
+        });
       }
       await this.incomeExpenseRepo.create({
         ...createPaymentDto,
@@ -149,11 +138,18 @@ export class PaymentService {
     }
   }
 
-  async remove(invoiceNumber: string) {
+  async remove(invoiceNumber: string, payload) {
     try {
+      if (payload.role !== RoleType.SUPERUSER) {
+        throw new UnauthorizedException({
+          message: 'only super user that can delete invoice',
+        });
+      }
+
       const checkInvoice = await this.checkInvoice(invoiceNumber);
-      if (!checkInvoice)
+      if (!checkInvoice) {
         throw new FilterException({ message: `invoice doesn't exist` });
+      }
 
       await this.invoiceRepository.destroy({
         where: {
@@ -173,8 +169,18 @@ export class PaymentService {
   }
 
   async getAllData(payload) {
-    //check apakah user admin
-    return this.invoiceRepository.findAndCountAll();
+    try {
+      if (payload.role !== RoleType.SUPERUSER) {
+        throw new UnauthorizedException({
+          message: 'only super user that can see it',
+        });
+      }
+      return this.invoiceRepository.findAndCountAll({
+        include: [{ model: User }],
+      });
+    } catch (err) {
+      throw new FilterException(err);
+    }
   }
 
   private async checkInvoice(invoiceNumber) {
@@ -182,6 +188,7 @@ export class PaymentService {
       where: {
         invoiceNumber,
       },
+      include: [{ model: IncomeExpense }],
     });
   }
 }
