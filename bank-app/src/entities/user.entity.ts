@@ -1,14 +1,14 @@
 import {
   AllowNull,
   BeforeCreate,
-  BelongsTo,
   Column,
   HasMany,
+  Length,
   Model,
   PrimaryKey,
   Table,
-  Validate,
 } from 'sequelize-typescript';
+import { RoleType } from 'src/common/enum';
 
 import { v4 as uuid } from 'uuid';
 import { IncomeExpense } from './IncomeExpense.entity';
@@ -30,18 +30,12 @@ export class User extends Model {
   @Column({ allowNull: false, validate: { isEmail: true } })
   email: string;
 
+  @Length({ msg: 'min : 5, max : 30', min: 5, max: 30 })
   @Column({ allowNull: false })
   password: string;
 
-  @Column
-  userCode: string;
-
-  //   @Column
-  //   division: string;
-
-  //user & super user
-  @Column
-  role: string;
+  @Column({ defaultValue: RoleType.USER })
+  role: RoleType;
 
   @HasMany(() => IncomeExpense)
   incomeExpenseId: string;
@@ -55,10 +49,5 @@ export class User extends Model {
   static async hashPassword(user: User) {
     const salt = bcrypt.genSaltSync(10);
     user.password = bcrypt.hashSync(user.password, salt);
-  }
-
-  @BeforeCreate
-  static generateCode(user) {
-    user.userCode = 'ADM-' + user.id;
   }
 }

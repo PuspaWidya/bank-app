@@ -21,8 +21,9 @@ export default class Invoice extends Model {
   @Column
   type: TypeFee;
 
+  //hasil yang akan terus berkurang
   @Column
-  subtotal: number;
+  totalBalance: number;
 
   @Column
   invoiceNumber: string;

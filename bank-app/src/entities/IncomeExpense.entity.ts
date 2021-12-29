@@ -11,12 +11,13 @@ import {
   Table,
   Validate,
 } from 'sequelize-typescript';
-import { Col } from 'sequelize/dist/lib/utils';
-import { PaymentMethod } from 'src/common/enum';
+
+import { PaymentMethod, TypeFee } from 'src/common/enum';
 
 import { v4 as uuid } from 'uuid';
 import { User } from './user.entity';
 
+//log
 @Table
 export class IncomeExpense extends Model {
   @PrimaryKey
@@ -25,6 +26,9 @@ export class IncomeExpense extends Model {
 
   @Column({ allowNull: false })
   amount: number;
+
+  @Column
+  type: TypeFee;
 
   @Column
   quantity: number;

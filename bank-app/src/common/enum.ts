@@ -11,3 +11,8 @@ export enum TypeFee {
   INCOME = 'INCOME',
   EXPENSE = 'EXPENSE',
 }
+
+export enum RoleType {
+  USER = 'USER',
+  SUPERUSER = 'SUPERUSER',
+}

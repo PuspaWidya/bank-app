@@ -8,9 +8,10 @@ import { IncomeExpense } from './entities/IncomeExpense.entity';
 import { AuthModule } from './module/auth/auth.module';
 import { UsersModule } from './module/users/users.module';
 import { JwtModule } from '@nestjs/jwt';
-import Invoice from './entities/logPayment.entity';
+import Invoice from './entities/invoice.entity';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './module/auth/jwt-auth.guard';
+import { PaymentModule } from './module/payment/payment.module';
 
 @Module({
   imports: [
@@ -28,9 +29,10 @@ import { JwtAuthGuard } from './module/auth/jwt-auth.guard';
       synchronize: true,
       autoLoadModels: true,
     }),
-    JwtModule.register({}),
     AuthModule,
+    JwtModule.register({}),
     UsersModule,
+    PaymentModule,
   ],
   controllers: [AppController],
   providers: [
