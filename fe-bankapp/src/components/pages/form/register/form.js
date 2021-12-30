@@ -1,21 +1,24 @@
-import React from "react";
-import "../form/form.css";
-
+import React, { useState } from "react";
+import "../register/form.css";
 import { useForm } from "react-hook-form";
 
 export default function Form() {
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors },
   } = useForm();
 
+  const [newPassword, setNewPassword] = useState();
+
   const onSubmit = (data, event) => {
-    console.log({ data });
-    console.log({ event });
+    if (data.password !== data.confirmPassword) {
+      setNewPassword(false);
+    } else {
+      setNewPassword(true);
+    }
   };
-  console.log(errors);
+
   return (
     <div>
       <h1>Create an Account</h1>
@@ -34,6 +37,7 @@ export default function Form() {
           name="name"
           {...register("name", { required: true, maxLength: 20, minLength: 5 })}
         />
+        {errors.name && <p className="error"> Name required</p>}
 
         <label> Email * </label>
         <input
@@ -56,6 +60,7 @@ export default function Form() {
         )}
 
         <label htmlFor=""> Password * </label>
+
         <input
           name="password"
           type="password"
@@ -67,17 +72,29 @@ export default function Form() {
           })}
         />
 
+        {errors.password && <p className="error"> Password required</p>}
+
         <label htmlFor=""> Confirm Password * </label>
         <input
           name="confirmPassword"
           type="password"
           autoComplete="new-password"
-          {...register("password", {
+          {...register("confirmPassword", {
             required: true,
             maxLength: 20,
             minLength: 5,
           })}
         />
+        {errors.confirmPassword && (
+          <p className="error"> Confirm Password required</p>
+        )}
+        {newPassword === false && <p className="error"> Password not match</p>}
+
+        <label htmlFor=""> Role * </label>
+        <select {...register("role", { required: true })}>
+          <option value="SUPERUSER">Super User</option>
+          <option value="USER">User</option>
+        </select>
 
         <button type="button" onClick={handleSubmit(onSubmit)}>
           Sign Up
