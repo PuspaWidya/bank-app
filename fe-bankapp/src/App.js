@@ -4,12 +4,15 @@ import Routes from "./Routes";
 import Form from "./components/pages/form/register/form";
 import Login from "./components/pages/form/login/login";
 import CreateInvoice from "./components/pages/form/createInvoice/createInvoice";
+import ExpenseIncome from "./components/pages/form/expenseIncome/expenseIncome";
+
 function App() {
   return (
     <div className="App">
-      {/* <Form></Form>
+      <Form></Form>
       <Login></Login>
-      <CreateInvoice></CreateInvoice> */}
+      <CreateInvoice></CreateInvoice>
+      <ExpenseIncome />
     </div>
   );
 }
